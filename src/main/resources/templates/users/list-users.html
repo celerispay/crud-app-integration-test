@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+				xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head>
+	<!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+	<title>User Directory</title>
+</head>
+
+<body>
+
+<div class="container">
+	<a th:href="@{/}">home</a>
+	<a th:href="@{/logout}"  sec:authorize="isAuthenticated()">Logout</a>
+	<p>Welcome <span sec:authentication="name" sec:authorize="isAuthenticated()"></span></p>
+	<hr>
+	<h3>User Directory</h3>
+	<hr>
+	
+	<!-- Add a button -->
+	<a th:href="@{/users/add-form}"
+		class="btn btn-primary btn-sm mb-3">
+		Add User
+	</a>
+	
+	<table class="table table-bordered table-striped">
+		<caption>List of all Users</caption>
+		<thead class="table-dark">
+			<tr>
+				<th>User Name</th>
+				<th>Roles</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<tr th:each="tempUser : ${users}">
+			
+				<td th:text="${tempUser.username}" />
+				<td th:text="${tempUser.roles}" />
+				
+				<!-- Add update button link -->
+				<td>
+					<a th:href="@{/users/update-form(username=${tempUser.username})}"
+					   class="btn btn-info btn-sm">
+						Update
+					</a>
+				
+					<a th:href="@{/users/delete(username=${tempUser.username})}"
+					   class="btn btn-danger btn-sm"
+					   onclick="if(!(confirm('Are you sure you want to delete this user?'))) return false">
+						Delete
+					</a>
+				</td>
+				
+			</tr>
+		</tbody>
+	</table>
+	
+</div>
+
+</body>
+
+</html>

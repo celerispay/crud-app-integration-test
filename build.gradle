@@ -1,0 +1,92 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    
+	id 'java'
+	id 'eclipse'
+}
+
+group = 'crudapplication'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	
+	all {
+          exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+}
+
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+        }
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom(testImplementation)
+    integrationTestRuntimeOnly.extendsFrom(testRuntimeOnly)
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+	
+	implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    	
+	implementation 'org.flywaydb:flyway-core'
+	
+	compileOnly 'org.projectlombok:lombok'
+	implementation 'mysql:mysql-connector-java'
+	annotationProcessor 'org.projectlombok:lombok'
+	
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation ('io.rest-assured:rest-assured:5.4.0'){
+	 exclude group: "org.apache.groovy", module: "groovy"
+     exclude group: "org.apache.groovy", module: "groovy-xml"
+    }
+    testImplementation 'io.rest-assured:json-schema-validator:5.4.0'
+    testImplementation 'io.rest-assured:json-path:5.4.0'
+	testImplementation 'io.rest-assured:xml-path:5.4.0'
+	testImplementation 'io.rest-assured:rest-assured-common:5.4.0'
+    testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+	testImplementation 'com.sun.xml.bind:jaxb-impl:2.3.3'
+	testImplementation 'org.junit.platform:junit-platform-runner'
+}
+
+task integrationTest(type: Test) { 
+   testLogging.showStandardStreams = true 
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', true
+    description = "Run integration tests"
+    group = "verification"
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+test {
+	useJUnitPlatform()
+}
