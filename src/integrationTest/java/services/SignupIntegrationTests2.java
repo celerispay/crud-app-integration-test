@@ -1,4 +1,5 @@
 package services;
+
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -30,55 +31,45 @@ public class SignupIntegrationTests2 {
 
 	@LocalServerPort
 	private int port;
-	
 
 	@BeforeEach
 	public void setUp() {
 		RestAssured.port = port;
-		RequestSpecification rq = new RequestSpecBuilder().setBaseUri("http://localhost:" + port + "/crud-app/signup/").addHeader("Content-Type", "application/json").build();
+		RequestSpecification rq = new RequestSpecBuilder().setBaseUri("http://localhost:" + port + "/crud-app/signup/")
+				.addHeader("Content-Type", "application/json").build();
 		RestAssured.requestSpecification = rq;
 		RestAssured.authentication = RestAssured.basic(Enums.USERNAME.actualValue, Enums.PASSWORD.actualValue);
-		
-		
+
 	}
 
 	@Test
-	@Order(13)
+	@Order(1)
 	public void saveUserTest() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(HttpStatus.OK.value())
-				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("ADMIN"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBody).post(Enums.SAVE.actualValue).then().log()
+				.all().statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue,
+						equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("ADMIN"));
 	}
-	
+
 	@Test
-	@Order(14)
+	@Order(2)
 	public void saveUserTestWithThreeRoles() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN,USER,SERVER_ADMIN\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(HttpStatus.OK.value())
-				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("ADMIN,USER,SERVER_ADMIN"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithThreeRoles).post(Enums.SAVE.actualValue)
+				.then().log().all().statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue,
+						equalTo("ron"), Enums.ROLES.actualValue,
+						equalTo("ADMIN,USER,SERVER_ADMIN"));
+		RestAssured.given().log().all().when().delete("ron").then().log().all().statusCode(200);
 	}
 
 	@Test
-	@Order(15)
+	@Order(3)
 	public void saveUserTestWithRoleOtherThanCSV() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"EMPLOYEE\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(400).body(Enums.ERROR.actualValue, equalTo("Invalid role"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithRoleOtherThanCSV)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
+				.body(Enums.ERROR.actualValue, equalTo("Invalid role"));
 	}
 
 	@Test
-	@Order(16)
+	@Order(4)
 	public void saveUserTestWithWrongCredentials() {
 		RestAssured.reset();
 		RestAssured.port = port;
@@ -86,117 +77,89 @@ public class SignupIntegrationTests2 {
 		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
 				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
 
-		RestAssured.given().log().all().auth().basic(Enums.USERNAME.actualValue, "admin12X")
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(401).body("error", equalTo("Unauthorized"));
+		RestAssured.given().log().all().auth().basic(Enums.USERNAME.actualValue, "admin12X").when()
+				.body(SignUpHelper.requestBodyWithWrongCredentials).post(Enums.SAVE.actualValue).then().log().all()
+				.statusCode(401).body("error", equalTo("Unauthorized"));
 	}
 
 	@Test
-	@Order(17)
+	@Order(5)
 	public void saveUserTestWithBlankUsername() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(400)
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithBlankUsername)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("username can't be empty, only unique username"));
 	}
 
 	@Test
-	@Order(18)
+	@Order(6)
 	public void saveUserTestWithSameUsername() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"vaibhav\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(400)
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithSameUserName)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("User with this email id Already Exists"));
 	}
-	
-	@Test
-	@Order(19)
-	public void saveUserTestWithPasswordLessThan8Char() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"1234567\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
 
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(400)
+	@Test
+	@Order(7)
+	public void saveUserTestWithPasswordLessThan8Char() {
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithPasswordLessThan8Char)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Should contain atleast 8 digits"));
 	}
-	
+
 	@Test
-	@Order(20)
+	@Order(8)
 	public void saveUserTestWithPasswordLength7DigitWithSpaceAtEnd() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"1234567 \",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(200)
-				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("ADMIN"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithPassowrdLength7WithSpaceAtEnd)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(200).body(Enums.USERNAME_VAR.actualValue,
+						equalTo("ron"), Enums.ROLES.actualValue, equalTo("ADMIN"));
+		RestAssured.given().log().all().when().delete("ron").then().log().all().statusCode(200);
 	}
-	
+
 	@Test
-	@Order(21)
+	@Order(9)
 	public void saveUserTestWithPasswordLength7DigitWithSpaceAtStart() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \" 1234567 \",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(200)
-				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("ADMIN"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithPasswordLength7DigitWithSpaceAtStart)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(200).body(Enums.USERNAME_VAR.actualValue,
+						equalTo("ron"), Enums.ROLES.actualValue, equalTo("ADMIN"));
+		RestAssured.given().log().all().when().delete("ron").then().log().all().statusCode(200);
 	}
-	
+
 	@Test
-	@Order(22)
+	@Order(10)
 	public void saveUserTestWithBlankRole() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).post(Enums.SAVE.actualValue)
-				.then().log().all().statusCode(400).body(Enums.ERROR.actualValue, equalTo("employee should have atleast 1 role"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithBlankRole).post(Enums.SAVE.actualValue)
+				.then().log().all().statusCode(400)
+				.body(Enums.ERROR.actualValue, equalTo("employee should have atleast 1 role"));
 	}
 
 	@Test
-	@Order(23)
+	@Order(11)
 	public void updateUserTest() {
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"USER\"\r\n" + "}";
-
-		RestAssured.given().log().all()
-				.when().body(requestBody).put(Enums.UPDATE.actualValue)
-				.then().log().all().statusCode(HttpStatus.OK.value())
-				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("USER"));
+		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithUpdatedUser)
+				.put(Enums.UPDATE.actualValue).then().log().all().statusCode(HttpStatus.OK.value())
+				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue,
+						equalTo("USER"));
 	}
 
 	@Test
-	@Order(24)
+	@Order(12)
 	public void getUserTest() {
-		RestAssured.given().log().all()
-				.when().get(Enums.LIST.actualValue).then().log().all()
-				.statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue, hasItems(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, hasItems("USER"));
+		RestAssured.given().log().all().when().get(Enums.LIST.actualValue).then().log().all()
+				.statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue,
+						hasItems(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, hasItems("USER"));
 	}
 
 	@Test
-	@Order(25)
+	@Order(13)
 	public void getUserWithUsernameTest() {
-		String username = Enums.DUMMY_NAME.actualValue;
-		RestAssured.given().log().all()
-				.when().get(username).then().log()
-				.all().statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("USER"));
+		RestAssured.given().log().all().when().get(Enums.DUMMY_NAME.actualValue).then().log().all().statusCode(HttpStatus.OK.value()).body(
+				Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue,
+				equalTo("USER"));
 	}
 
 	@Test
-	@Order(26)
+	@Order(14)
 	public void deleteUserTest() {
-		String username = Enums.DUMMY_NAME.actualValue;
-		RestAssured.given().log().all()
-				.when().delete(username).then().log()
-				.all().statusCode(HttpStatus.OK.value());
+		RestAssured.given().log().all().when().delete(Enums.DUMMY_NAME.actualValue).then().log().all().statusCode(HttpStatus.OK.value());
 	}
 }
