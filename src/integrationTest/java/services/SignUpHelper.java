@@ -1,43 +1,24 @@
 package services;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class SignUpHelper {
-	
-	public static String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithThreeRoles = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Ron\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN,USER,SERVER_ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithRoleOtherThanCSV = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Ron\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"EMPLOYEE\"\r\n" + "}";
-	
-	public static String requestBodyWithWrongCredentials = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithBlankUsername = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithSameUserName = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"vaibhav\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithPasswordLessThan8Char = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-			+ "		\"password\": \"1234567\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithPassowrdLength7WithSpaceAtEnd = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Ron\",\r\n"
-			+ "		\"password\": \"1234567 \",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithPasswordLength7DigitWithSpaceAtStart = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Ron\",\r\n"
-			+ "		\"password\": \" 1234567 \",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-	
-	public static String requestBodyWithBlankRole = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"\"\r\n" + "}";
-	
-	public static String requestBodyWithUpdatedUser = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-			+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"USER\"\r\n" + "}";
-	
-	
-	
-	
-	
-	
+
+	public static Map<Object, Object> jsonToMap(String path)
+			throws JsonParseException, JsonMappingException, IOException {
+		File jsonFile = new File(
+				"C:\\Users\\Admin\\eclipse-workspace\\crud-application\\src\\integrationTest\\resources\\jsonFiles\\"
+						+ path);
+		ObjectMapper objectMapper = new ObjectMapper();
+		Map<Object, Object> jsonMap = objectMapper.readValue(jsonFile, Map.class);
+		return jsonMap;
+
+	}
+
 }

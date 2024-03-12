@@ -13,6 +13,11 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import crudapplication.crud.CrudApplication;
 import crudapplication.crud.controller.EmployeeController;
 import crudapplication.crud.service.EmployeeService;
@@ -21,6 +26,11 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.longThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 import javax.activation.DataSource;
 
@@ -44,111 +54,146 @@ public class EmployeeIntegrationTests {
 
 	@Test
 	@Order(1)
-	public void saveEmployeeTest() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBody).post(Enums.SAVE.actualValue).then()
+	public void saveEmployeeTest() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson1.json");
+		RestAssured.given().log().all().when().body(jsonMap).post(Enums.SAVE.actualValue).then()
 				.log().all().statusCode(HttpStatus.OK.value()).body(Enums.NAME_VAR.actualValue, equalTo("Ankit"),
 						Enums.EMAIL.actualValue, equalTo(Enums.DUMMY_EMAIL.actualValue));
 	}
 
 	@Test
 	@Order(2)
-	public void saveEmployeeTestWithBlankName() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithBlankName)
+	public void saveEmployeeTestWithBlankName() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("name", "");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Please provide a Name"));
 	}
 
 	@Test
 	@Order(3)
-	public void saveEmployeeTestWithBlankEmail() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithBlankEmail)
+	public void saveEmployeeTestWithBlankEmail() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("email", "");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Please provide a unique Email id"));
 	}
 
 	@Test
 	@Order(4)
-	public void saveEmployeeTestWithSameEmail() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithSameEmail)
+	public void saveEmployeeTestWithSameEmail() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("email", "ankit@gmail.com");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Employee with this email id Already Exists"));
 	}
-
+	
 	@Test
 	@Order(5)
-	public void saveEmployeeTestWithBlankDesignation() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithBlankDesignation)
+	public void saveEmployeeTestWithBlankDesignation() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("designation", "");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Please provide a Designation"));
 	}
 
 	@Test
 	@Order(6)
-	public void saveEmployeeTestWithSalaryLessThan10000() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithSalaryLessThan10000)
+	public void saveEmployeeTestWithSalaryLessThan10000() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("salary", "8000");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Salary can't be less than 10000"));
 	}
 
 	@Test
 	@Order(7)
-	public void saveEmployeeTestWithSalaryInChar() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithSalaryInChar)
+	public void saveEmployeeTestWithSalaryInUnknownToken() {
+		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithSalaryInUnknownToken)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, containsString(
 						String.format("JSON parse error: Unrecognized token '%s'", EmployeeHelper.wrongSalary)));
 	}
-
+	
 	@Test
 	@Order(8)
-	public void saveEmployeeTestWithGenderOtherThanMAndF() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithWrongGender)
+	public void saveEmployeeTestWithSalaryInChar() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+		String value = "ABCD";
+        jsonMap.put("salary", value);
+		RestAssured.given().log().all().when().body(jsonMap)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
+				.body(Enums.ERROR.actualValue, containsString(
+						String.format("JSON parse error: Cannot deserialize value of type `long` from String \"%s\"", EmployeeHelper.wrongSalary)));
+	}
+
+	@Test
+	@Order(9)
+	public void saveEmployeeTestWithGenderOtherThanMAndF() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("gender", "FF");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Please provide a gender M/F"));
 	}
 
 	@Test
-	@Order(9)
-	public void saveEmployeeTestWithBlankGender() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithBlankGender)
+	@Order(10)
+	public void saveEmployeeTestWithBlankGender() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("gender", "");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("gender can't be empty"));
 	}
 
 	@Test
-	@Order(10)
-	public void saveEmployeeTestWithBlankAddress() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithBlankAddress)
+	@Order(11)
+	public void saveEmployeeTestWithBlankAddress() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("address", "");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400).body(Enums.ERROR.actualValue, allOf(
 						containsString("Please provide a address"), containsString("Enter a vaild length Address")));
 	}
 
 	@Test
-	@Order(11)
-	public void saveEmployeeTestWithLessThan5CharAddress() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithAddressLessThan5Char)
-				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
-				.body(Enums.ERROR.actualValue, equalTo("Enter a vaild length Address"));
-	}
-
-	@Test
 	@Order(12)
-	public void saveEmployeeTestWithMoreThan100CharAddress() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithAddressMoreThan100Char)
+	public void saveEmployeeTestWithLessThan5CharAddress() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("address", "ABC");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Enter a vaild length Address"));
 	}
 
 	@Test
 	@Order(13)
-	public void updateEmployeeTest() {
-		RestAssured.given().log().all().when().body(EmployeeHelper.requestBodyWithUpdatedSalary)
-				.put(Enums.UPDATE.actualValue).then().log().all().statusCode(HttpStatus.OK.value())
-				.body(Enums.NAME_VAR.actualValue, equalTo("Ankit"), "salary", equalTo(21000));
+	public void saveEmployeeTestWithMoreThan100CharAddress() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson2.json");
+        jsonMap.put("address", "6kMh7vixQk-y5?85/,)_bc8&*#hP6VnWEG(_@?tj:q(Fi{BG&ZE6mR;60A@{F*uLZUH!7=5YLZFRdTvuD$Fi(%9T1wF#SRxb#ark.");
+		RestAssured.given().log().all().when().body(jsonMap)
+				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
+				.body(Enums.ERROR.actualValue, equalTo("Enter a vaild length Address"));
 	}
 
 	@Test
 	@Order(14)
+	public void updateEmployeeTest() throws JsonParseException, JsonMappingException, IOException {
+		Map<String, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson1.json");
+        jsonMap.put("salary", "21000");
+		RestAssured.given().log().all().when().body(jsonMap)
+				.put(Enums.UPDATE.actualValue).then().log().all().statusCode(HttpStatus.OK.value())
+				.body(Enums.NAME_VAR.actualValue, equalTo("Ankit"), Enums.SALARY_VAR.actualValue, equalTo(21000));
+	}
+
+	@Test
+	@Order(15)
 	public void getEmployeeTest() {
 		RestAssured.given().log().all().when().get(Enums.LIST.actualValue).then().log().all()
 				.statusCode(HttpStatus.OK.value()).body(Enums.NAME_VAR.actualValue, hasItems("Ankit"),
@@ -156,7 +201,7 @@ public class EmployeeIntegrationTests {
 	}
 
 	@Test
-	@Order(15)
+	@Order(16)
 	public void getEmployeeWithEmailTest() {
 		RestAssured.given().log().all().when().get(Enums.DUMMY_EMAIL.actualValue).then().log().all()
 				.statusCode(HttpStatus.OK.value()).body(Enums.NAME_VAR.actualValue, equalTo("Ankit"),
@@ -164,7 +209,7 @@ public class EmployeeIntegrationTests {
 	}
 
 	@Test
-	@Order(16)
+	@Order(17)
 	public void deleteEmployeeTest() {
 		RestAssured.given().log().all().when().delete(Enums.DUMMY_EMAIL.actualValue).then().log().all()
 				.statusCode(HttpStatus.OK.value());

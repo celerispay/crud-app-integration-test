@@ -1,0 +1,6 @@
+{
+		"id": 2,
+		"username": "Ron",
+		"password": "87654321",
+		"roles" : "Admin,USER,SERVER_ADMIN"
+}

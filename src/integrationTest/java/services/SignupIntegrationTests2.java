@@ -13,6 +13,9 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import crudapplication.crud.CrudApplication;
 import crudapplication.crud.controller.EmployeeController;
 import crudapplication.crud.service.EmployeeService;
@@ -21,6 +24,9 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import static org.hamcrest.Matchers.*;
+
+import java.io.IOException;
+import java.util.Map;
 
 import javax.activation.DataSource;
 
@@ -44,16 +50,18 @@ public class SignupIntegrationTests2 {
 
 	@Test
 	@Order(1)
-	public void saveUserTest() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBody).post(Enums.SAVE.actualValue).then().log()
+	public void saveUserTest() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson1.json");
+		RestAssured.given().log().all().when().body(jsonMap).post(Enums.SAVE.actualValue).then().log()
 				.all().statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue,
 						equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue, equalTo("ADMIN"));
 	}
 
 	@Test
 	@Order(2)
-	public void saveUserTestWithThreeRoles() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithThreeRoles).post(Enums.SAVE.actualValue)
+	public void saveUserTestWithThreeRoles() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		RestAssured.given().log().all().when().body(jsonMap).post(Enums.SAVE.actualValue)
 				.then().log().all().statusCode(HttpStatus.OK.value()).body(Enums.USERNAME_VAR.actualValue,
 						equalTo("ron"), Enums.ROLES.actualValue,
 						equalTo("ADMIN,USER,SERVER_ADMIN"));
@@ -62,80 +70,95 @@ public class SignupIntegrationTests2 {
 
 	@Test
 	@Order(3)
-	public void saveUserTestWithRoleOtherThanCSV() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithRoleOtherThanCSV)
+	public void saveUserTestWithRoleOtherThanCSV() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		 jsonMap.put("roles", "EMPLOYEE");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Invalid role"));
 	}
 
 	@Test
 	@Order(4)
-	public void saveUserTestWithWrongCredentials() {
+	public void saveUserTestWithWrongCredentials() throws JsonParseException, JsonMappingException, IOException {
 		RestAssured.reset();
 		RestAssured.port = port;
 		RestAssured.baseURI = "http://localhost:" + port + "/crud-app/signup/";
-		String requestBody = "{\r\n" + "		\"id\": 1,\r\n" + "		\"username\": \"Tom\",\r\n"
-				+ "		\"password\": \"12345678\",\r\n" + "		\"roles\" : \"ADMIN\"\r\n" + "}";
-
+		
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson1.json");
 		RestAssured.given().log().all().auth().basic(Enums.USERNAME.actualValue, "admin12X").when()
-				.body(SignUpHelper.requestBodyWithWrongCredentials).post(Enums.SAVE.actualValue).then().log().all()
+				.body(jsonMap).post(Enums.SAVE.actualValue).then().log().all()
 				.statusCode(401).body("error", equalTo("Unauthorized"));
 	}
 
 	@Test
 	@Order(5)
-	public void saveUserTestWithBlankUsername() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithBlankUsername)
+	public void saveUserTestWithBlankUsername() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		 jsonMap.put("username", "");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("username can't be empty, only unique username"));
 	}
 
 	@Test
 	@Order(6)
-	public void saveUserTestWithSameUsername() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithSameUserName)
+	public void saveUserTestWithSameUsername() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		 jsonMap.put("username", "Vaibhav");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("User with this email id Already Exists"));
 	}
 
 	@Test
 	@Order(7)
-	public void saveUserTestWithPasswordLessThan8Char() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithPasswordLessThan8Char)
+	public void saveUserTestWithPasswordLessThan8Char() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		 jsonMap.put("password", "1234567");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("Should contain atleast 8 digits"));
 	}
 
 	@Test
 	@Order(8)
-	public void saveUserTestWithPasswordLength7DigitWithSpaceAtEnd() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithPassowrdLength7WithSpaceAtEnd)
+	public void saveUserTestWithPasswordLength7DigitWithSpaceAtEnd() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		jsonMap.put("password", "1234567 ");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(200).body(Enums.USERNAME_VAR.actualValue,
-						equalTo("ron"), Enums.ROLES.actualValue, equalTo("ADMIN"));
+						equalTo("ron"), Enums.ROLES.actualValue, equalTo("ADMIN,USER,SERVER_ADMIN"));
 		RestAssured.given().log().all().when().delete("ron").then().log().all().statusCode(200);
 	}
 
 	@Test
 	@Order(9)
-	public void saveUserTestWithPasswordLength7DigitWithSpaceAtStart() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithPasswordLength7DigitWithSpaceAtStart)
+	public void saveUserTestWithPasswordLength7DigitWithSpaceAtStart() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		jsonMap.put("password", " 1234567");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.post(Enums.SAVE.actualValue).then().log().all().statusCode(200).body(Enums.USERNAME_VAR.actualValue,
-						equalTo("ron"), Enums.ROLES.actualValue, equalTo("ADMIN"));
+						equalTo("ron"), Enums.ROLES.actualValue, equalTo("ADMIN,USER,SERVER_ADMIN"));
 		RestAssured.given().log().all().when().delete("ron").then().log().all().statusCode(200);
 	}
 
 	@Test
 	@Order(10)
-	public void saveUserTestWithBlankRole() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithBlankRole).post(Enums.SAVE.actualValue)
+	public void saveUserTestWithBlankRole() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson2.json");
+		jsonMap.put("roles", "");
+		RestAssured.given().log().all().when().body(jsonMap).post(Enums.SAVE.actualValue)
 				.then().log().all().statusCode(400)
 				.body(Enums.ERROR.actualValue, equalTo("employee should have atleast 1 role"));
 	}
 
 	@Test
 	@Order(11)
-	public void updateUserTest() {
-		RestAssured.given().log().all().when().body(SignUpHelper.requestBodyWithUpdatedUser)
+	public void updateUserTest() throws JsonParseException, JsonMappingException, IOException {
+		Map<Object, Object> jsonMap = SignUpHelper.jsonToMap("signUpDummyTestJson1.json");
+		jsonMap.put("roles", "USER");
+		RestAssured.given().log().all().when().body(jsonMap)
 				.put(Enums.UPDATE.actualValue).then().log().all().statusCode(HttpStatus.OK.value())
 				.body(Enums.USERNAME_VAR.actualValue, equalTo(Enums.DUMMY_NAME.actualValue), Enums.ROLES.actualValue,
 						equalTo("USER"));

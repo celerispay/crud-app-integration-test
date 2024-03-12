@@ -1,0 +1,6 @@
+{
+		"id": 1,
+		"username": "Tom",
+		"password": "12345678",
+		"roles" : "ADMIN"
+}

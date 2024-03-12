@@ -16,7 +16,8 @@ public enum Enums {
 	USERNAME_VAR("username"),
 	NAME_VAR("name"),
 	EMAIL("email"),
-	DUMMY_EMAIL("ankit@gmail.com");
+	DUMMY_EMAIL("ankit@gmail.com"),
+	SALARY_VAR("salary");
 
 	public final String actualValue;
 
