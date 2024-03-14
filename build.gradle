@@ -75,9 +75,10 @@ dependencies {
     testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
 	testImplementation 'com.sun.xml.bind:jaxb-impl:2.3.3'
 	testImplementation 'org.junit.platform:junit-platform-runner'
+	testImplementation 'com.aventstack:extentreports:5.0.7'
 }
 
-task integrationTest(type: Test) { 
+task integrationTest(type: Test) {
    testLogging.showStandardStreams = true 
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', true

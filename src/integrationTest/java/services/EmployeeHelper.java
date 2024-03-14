@@ -17,13 +17,13 @@ public class EmployeeHelper {
 			+ "		\"designation\" : \"HR\",\r\n" + "		\"salary\" : ABCD,\r\n" + "		\"gender\" : \"F\",\r\n"
 			+ "		\"address\": \"Mathura\"\r\n" + "	}";
 
-	public static Map<String, Object> jsonToMap(String path)
+	public static Map<Object, Object> jsonToMap(String path)
 			throws JsonParseException, JsonMappingException, IOException {
 		File jsonFile = new File(
 				"C:\\Users\\Admin\\eclipse-workspace\\crud-application\\src\\integrationTest\\resources\\jsonFiles\\"
 						+ path);
 		ObjectMapper objectMapper = new ObjectMapper();
-		Map<String, Object> jsonMap = objectMapper.readValue(jsonFile, Map.class);
+		Map<Object, Object> jsonMap = objectMapper.readValue(jsonFile, Map.class);
 		return jsonMap;
 	}
 
