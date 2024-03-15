@@ -2,6 +2,7 @@ package services;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -19,6 +20,12 @@ public class SignUpHelper {
 		Map<Object, Object> jsonMap = objectMapper.readValue(jsonFile, Map.class);
 		return jsonMap;
 
+	}
+	
+	public static Path createPath(String path) {
+		Path filepath
+        = Path.of(path);
+		return filepath;
 	}
 
 }

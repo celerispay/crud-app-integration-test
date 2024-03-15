@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/Welcome8Element"
+    },
+    "definitions": {
+        "Welcome8Element": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "format": "integer"
+                },
+                "roles": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "password",
+                "roles",
+                "username"
+            ],
+            "title": "Welcome8Element"
+        }
+    }
+}

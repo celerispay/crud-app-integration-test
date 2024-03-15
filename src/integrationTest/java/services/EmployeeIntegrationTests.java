@@ -5,7 +5,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,10 +17,12 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.MariaDBContainer;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -25,12 +31,18 @@ import crudapplication.crud.CrudApplication;
 import enums.Enums;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.specification.RequestSpecification;
+import junit.framework.Assert;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = CrudApplication.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("integrationTest")
 @TestMethodOrder(OrderAnnotation.class)
 public class EmployeeIntegrationTests {
+
+	private String employeeSchemaFilePath1 = "C:\\Users\\Admin\\eclipse-workspace\\crud-application\\src\\integrationTest\\resources\\jsonSchemas\\employeeDummyTestJson1Schema.json";
+	private String employeeSchemaFilePath2 = "C:\\Users\\Admin\\eclipse-workspace\\crud-application\\src\\integrationTest\\resources\\jsonSchemas\\employeeDummyTestJson2Schema.json";
 
 	@LocalServerPort
 	private int port;
@@ -48,10 +60,13 @@ public class EmployeeIntegrationTests {
 	@Test
 	@Order(1)
 	public void saveEmployeeTest() throws JsonParseException, JsonMappingException, IOException {
+		Path path = EmployeeHelper.createPath(employeeSchemaFilePath1);
+		String jsonSchema = Files.readString(path);
 		Map<Object, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson1.json");
 		RestAssured.given().log().all().when().body(jsonMap).post(Enums.SAVE.actualValue).then().log().all()
-				.statusCode(HttpStatus.OK.value()).body(Enums.NAME_VAR.actualValue, equalTo("Ankit"),
-						Enums.EMAIL.actualValue, equalTo(Enums.DUMMY_EMAIL.actualValue));
+				.statusCode(HttpStatus.OK.value()).body((JsonSchemaValidator.matchesJsonSchema(jsonSchema)))
+				.body(Enums.NAME_VAR.actualValue, equalTo("Ankit"), Enums.EMAIL.actualValue,
+						equalTo(Enums.DUMMY_EMAIL.actualValue));
 	}
 
 	@Test
@@ -176,25 +191,33 @@ public class EmployeeIntegrationTests {
 	public void updateEmployeeTest() throws JsonParseException, JsonMappingException, IOException {
 		Map<Object, Object> jsonMap = EmployeeHelper.jsonToMap("employeeDummyTestJson1.json");
 		jsonMap.put("salary", "21000");
+		Path path = EmployeeHelper.createPath(employeeSchemaFilePath1);
+		String jsonSchema = Files.readString(path);
 		RestAssured.given().log().all().when().body(jsonMap).put(Enums.UPDATE.actualValue).then().log().all()
-				.statusCode(HttpStatus.OK.value())
+				.statusCode(HttpStatus.OK.value()).body((JsonSchemaValidator.matchesJsonSchema(jsonSchema)))
 				.body(Enums.NAME_VAR.actualValue, equalTo("Ankit"), Enums.SALARY_VAR.actualValue, equalTo(21000));
 	}
 
 	@Test
 	@Order(15)
-	public void getEmployeeTest() {
+	public void getEmployeeTest() throws IOException {
+		Path path = EmployeeHelper.createPath(employeeSchemaFilePath2);
+		String jsonSchema = Files.readString(path);
 		RestAssured.given().log().all().when().get(Enums.LIST.actualValue).then().log().all()
-				.statusCode(HttpStatus.OK.value()).body(Enums.NAME_VAR.actualValue, hasItems("Ankit"),
-						Enums.EMAIL.actualValue, hasItems(Enums.DUMMY_EMAIL.actualValue));
+				.statusCode(HttpStatus.OK.value()).body((JsonSchemaValidator.matchesJsonSchema(jsonSchema)))
+				.body(Enums.NAME_VAR.actualValue, hasItems("Ankit"), Enums.EMAIL.actualValue,
+						hasItems(Enums.DUMMY_EMAIL.actualValue));
 	}
 
 	@Test
 	@Order(16)
-	public void getEmployeeWithEmailTest() {
+	public void getEmployeeWithEmailTest() throws IOException {
+		Path path = EmployeeHelper.createPath(employeeSchemaFilePath1);
+		String jsonSchema = Files.readString(path);
 		RestAssured.given().log().all().when().get(Enums.DUMMY_EMAIL.actualValue).then().log().all()
-				.statusCode(HttpStatus.OK.value()).body(Enums.NAME_VAR.actualValue, equalTo("Ankit"),
-						Enums.EMAIL.actualValue, equalTo(Enums.DUMMY_EMAIL.actualValue));
+				.statusCode(HttpStatus.OK.value()).body((JsonSchemaValidator.matchesJsonSchema(jsonSchema)))
+				.body(Enums.NAME_VAR.actualValue, equalTo("Ankit"), Enums.EMAIL.actualValue,
+						equalTo(Enums.DUMMY_EMAIL.actualValue));
 	}
 
 	@Test

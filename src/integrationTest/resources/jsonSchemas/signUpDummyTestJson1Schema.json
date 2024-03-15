@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/Welcome9",
+    "definitions": {
+        "Welcome9": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "format": "integer"
+                },
+                "roles": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "password",
+                "roles",
+                "username"
+            ],
+            "title": "Welcome9"
+        }
+    }
+}

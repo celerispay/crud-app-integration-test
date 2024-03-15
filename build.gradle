@@ -76,6 +76,7 @@ dependencies {
 	testImplementation 'com.sun.xml.bind:jaxb-impl:2.3.3'
 	testImplementation 'org.junit.platform:junit-platform-runner'
 	testImplementation 'com.aventstack:extentreports:5.0.7'
+	testImplementation "org.testcontainers:mariadb:1.19.7"
 }
 
 task integrationTest(type: Test) {
