@@ -1,43 +1,49 @@
 package services;
 
-import org.apache.http.entity.ContentType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import crudapplication.crud.CrudApplication;
-import crudapplication.crud.controller.EmployeeController;
-import crudapplication.crud.service.EmployeeService;
-import enums.Enums;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.module.jsv.JsonSchemaValidator;
-import io.restassured.specification.RequestSpecification;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-import javax.activation.DataSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+
+import com.epam.reportportal.junit5.ReportPortalExtension;
+import com.epam.reportportal.listeners.LogLevel;
+import com.epam.reportportal.restassured.ReportPortalRestAssuredLoggingFilter;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import crudapplication.crud.CrudApplication;
+import enums.Enums;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.module.jsv.JsonSchemaValidator;
+import io.restassured.specification.RequestSpecification;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = CrudApplication.class)
 @ActiveProfiles("integrationTest")
 @TestMethodOrder(OrderAnnotation.class)
-public class SignupIntegrationTests {
-
+@ExtendWith(ReportPortalExtension.class)
+@DirtiesContext
+public class SignupIntegrationTests extends AbstractContainerBaseTest{
+	
+	
+	static {
+		RestAssured.filters(new ReportPortalRestAssuredLoggingFilter(42, LogLevel.INFO));
+	}
 	private String signUpSchemaFilePath1 = "C:\\Users\\Admin\\eclipse-workspace\\crud-application\\src\\integrationTest\\resources\\jsonSchemas\\signUpDummyTestJson1Schema.json";
 	private String signUpSchemaFilePath2 = "C:\\Users\\Admin\\eclipse-workspace\\crud-application\\src\\integrationTest\\resources\\jsonSchemas\\signUpDummyTestJson2Schema.json";
 
