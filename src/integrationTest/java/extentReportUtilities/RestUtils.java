@@ -1,12 +1,13 @@
 package extentReportUtilities;
 
+import static integrationTestUtilities.IntegrationTestHelper.PASSWORD;
+import static integrationTestUtilities.IntegrationTestHelper.USERNAME;
+
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
-import enums.Enums;
 import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.Response;
 import io.restassured.specification.QueryableRequestSpecification;
 import io.restassured.specification.RequestSpecification;
@@ -16,7 +17,7 @@ public class RestUtils {
 	
 	private static RequestSpecification getRequestSpecification(String endpoint, Object requestPayload) {
 		
-		return RestAssured.given().baseUri(endpoint).auth().basic(Enums.USERNAME.actualValue, Enums.PASSWORD.actualValue).header("Content-Type", "application/json").body(requestPayload);
+		return RestAssured.given().baseUri(endpoint).auth().basic(USERNAME, PASSWORD).header("Content-Type", "application/json").body(requestPayload);
 	}
 	
 public static Response performPost(String endpoint, Map<Object, Object> requestPayload, String path) {
@@ -28,7 +29,7 @@ public static Response performPost(String endpoint, Map<Object, Object> requestP
 	}
 
 public static void performDelete(String endpoint, String email) {
-	RestAssured.given().baseUri(endpoint).auth().basic(Enums.USERNAME.actualValue, Enums.PASSWORD.actualValue).when().delete(email).then().log().all()
+	RestAssured.given().baseUri(endpoint).auth().basic(USERNAME, PASSWORD).when().delete(email).then().log().all()
 	.statusCode(HttpStatus.OK.value());
 }
 

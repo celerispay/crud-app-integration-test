@@ -1,4 +1,4 @@
-package services;
+package testContainerConfiguration;
 
 import org.junit.jupiter.api.AfterAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -8,7 +8,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-abstract class AbstractContainerBaseTest {
+public abstract class AbstractContainerBaseTest {
 
 	@Container
 	static final MySQLContainer MY_SQL_CONTAINER;

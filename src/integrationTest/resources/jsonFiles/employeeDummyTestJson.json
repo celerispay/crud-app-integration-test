@@ -1,0 +1,20 @@
+{
+	"empJson1": {
+		"id": 5,
+		"name": "Ankit",
+		"email": "ankit@gmail.com",
+		"designation": "BA",
+		"salary": 19000,
+		"gender": "M",
+		"address": "Jamnagar"
+	},
+	"empJson2": {
+		"id": 5,
+		"name": "disha",
+		"email": "disha@gmail.com",
+		"designation": "HR",
+		"salary": 20000,
+		"gender": "F",
+		"address": "Mathura"
+	}
+}
