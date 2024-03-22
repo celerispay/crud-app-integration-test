@@ -57,8 +57,8 @@ public class EmployeeControllerIT extends AbstractContainerBaseTest {
 	@LocalServerPort
 	private int port;
 
-	private static String employeeSchemaFilePath1 = "src\\integrationTest\\resources\\jsonSchemas\\employeeDummyTestJson1Schema.json";
-	private static String employeeSchemaFilePath2 = "src\\integrationTest\\resources\\jsonSchemas\\employeeDummyTestJson2Schema.json";
+	private static String employeeSchemaFilePath1 = "employeeDummyTestJson1Schema.json";
+	private static String employeeSchemaFilePath2 = "employeeDummyTestJson2Schema.json";
 	private static JSONObject json = IntegrationTestHelper.jsonToMap("employeeDummyTestJson.json");
 	private static JSONObject empJson1;
 	private static JSONObject empJson2;

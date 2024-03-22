@@ -60,8 +60,8 @@ public class SignUpControllerIT extends AbstractContainerBaseTest {
 	@LocalServerPort
 	private int port;
 
-	private String signUpSchemaFilePath1 = "src\\integrationTest\\resources\\jsonSchemas\\signUpDummyTestJson1Schema.json";
-	private String signUpSchemaFilePath2 = "src\\integrationTest\\resources\\jsonSchemas\\signUpDummyTestJson2Schema.json";
+	private String signUpSchemaFilePath1 = "signUpDummyTestJson1Schema.json";
+	private String signUpSchemaFilePath2 = "signUpDummyTestJson2Schema.json";
 	private static JSONObject json = IntegrationTestHelper.jsonToMap("signUpDummyTestJson.json");
 	private static JSONObject signUpJson1;
 	private static JSONObject signUpJson2;

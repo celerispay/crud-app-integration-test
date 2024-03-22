@@ -1,6 +1,5 @@
 package integrationTestUtilities;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,12 +49,11 @@ public class IntegrationTestHelper {
 			+ "		\"designation\" : \"HR\",\r\n" + "		\"salary\" : ABCD,\r\n" + "		\"gender\" : \"F\",\r\n"
 			+ "		\"address\": \"Mathura\"\r\n" + "	}";
 
-	public static JSONObject jsonToMap(String path) {
-		File jsonFile = new File("src\\integrationTest\\resources\\jsonFiles\\" + path);
+	public static JSONObject jsonToMap(String fileName) {
+		Path path = Paths.get("src", "integrationTest", "resources", "jsonFiles", fileName);
 		JSONObject jsonMap = null;
 		try {
-			jsonMap = new JSONObject(new String(Files.readAllBytes(jsonFile.toPath())));
-			System.out.println("IntegrationTestHelper.jsonToMap()" + jsonMap);
+			jsonMap = new JSONObject(new String(Files.readAllBytes(path)));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,13 +68,8 @@ public class IntegrationTestHelper {
 		return basicAuthScheme;
 	}
 
-	public static Path createPath(String path) {
-		Path filepath = Path.of(path);
-		return filepath;
-	}
-
-	public static String readFile(String filepath) throws IOException {
-		Path path = Paths.get(filepath);
+	public static String readFile(String fileName) throws IOException {
+		Path path = Paths.get("src", "integrationTest", "resources", "jsonSchemas", fileName);
 		byte[] fileData = Files.readAllBytes(path);
 		String fileContent = new String(fileData);
 		return fileContent;
